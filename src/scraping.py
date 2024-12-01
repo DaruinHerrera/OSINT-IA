@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,7 +9,8 @@ import csv
 
 def scrape_and_save(url, driver_path, output_file):
     # Iniciar el navegador
-    driver = webdriver.Chrome(executable_path=driver_path)
+    service = Service(driver_path)
+    driver = webdriver.Chrome(service=service)
     
     try:
         # Navegar al sitio web
@@ -52,8 +54,8 @@ def scrape_and_save(url, driver_path, output_file):
         driver.quit()
 
 # Parámetros de entrada
-url = "https://example.com"  # Reemplaza con el sitio web deseado
-driver_path = "ruta/a/chromedriver"  # Ruta al ejecutable de ChromeDriver
+url = "https://krebsonsecurity.com/"  # Reemplaza con el sitio web deseado
+driver_path = "D:\\Development\\drivers\\chromedriver-win64\\chromedriver.exe"  # Ruta al ejecutable de ChromeDriver
 output_file = "resultados.csv"  # Nombre del archivo de salida
 
 # Ejecutar la función
