@@ -1,16 +1,60 @@
-import requests
-from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+import csv
 
-url = "https://krebsonsecurity.com/"
-response = requests.get(url)
+def scrape_and_save(url, driver_path, output_file):
+    # Iniciar el navegador
+    driver = webdriver.Chrome(executable_path=driver_path)
+    
+    try:
+        # Navegar al sitio web
+        driver.get(url)
 
-if response.status_code == 200:
-    soup = BeautifulSoup(response.text, 'html.parser')
-    articles = soup.find_all('article')
+        # Esperar hasta que los artículos estén presentes
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.TAG_NAME, "article"))
+        )
 
-    for article in articles:
-        title = article.find('h2').text
-        link = article.find('a')['href']
-        print(f"Título: {title}, Enlace: {link}")
-else:
-    print(f"Error al acceder al sitio: {response.status_code}")
+        # Lista para almacenar los datos extraídos
+        data = []
+
+        # Extraer todos los artículos de la página
+        articles = driver.find_elements(By.TAG_NAME, "article")
+        for article in articles:
+            try:
+                # Extraer título y enlace de cada artículo
+                title = article.find_element(By.TAG_NAME, "h2").text
+                link = article.find_element(By.TAG_NAME, "a").get_attribute("href")
+                data.append([title, link])
+            except Exception as e:
+                print(f"Error al procesar un artículo: {e}")
+
+        # Simular un scroll para cargar más contenido si es necesario
+        body = driver.find_element(By.TAG_NAME, "body")
+        for _ in range(3):  # Scroll 3 veces
+            body.send_keys(Keys.PAGE_DOWN)
+            time.sleep(2)
+
+        # Guardar los datos en un archivo CSV
+        with open(output_file, 'w', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(['Título', 'Enlace'])
+            writer.writerows(data)
+        
+        print(f"Datos guardados en {output_file}")
+
+    finally:
+        # Cerrar el navegador
+        driver.quit()
+
+# Parámetros de entrada
+url = "https://example.com"  # Reemplaza con el sitio web deseado
+driver_path = "ruta/a/chromedriver"  # Ruta al ejecutable de ChromeDriver
+output_file = "resultados.csv"  # Nombre del archivo de salida
+
+# Ejecutar la función
+scrape_and_save(url, driver_path, output_file)
