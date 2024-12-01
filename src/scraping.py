@@ -8,55 +8,57 @@ import time
 import csv
 
 def scrape_and_save(url, driver_path, output_file):
-    # Iniciar el navegador
+    # start browser
     service = Service(driver_path)
     driver = webdriver.Chrome(service=service)
     
     try:
-        # Navegar al sitio web
+        # move site
         driver.get(url)
 
-        # Esperar hasta que los artículos estén presentes
+        # sleep
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.TAG_NAME, "article"))
         )
 
-        # Lista para almacenar los datos extraídos
+        # to save
         data = []
 
-        # Extraer todos los artículos de la página
+        # get articles to web site
         articles = driver.find_elements(By.TAG_NAME, "article")
         for article in articles:
             try:
-                # Extraer título y enlace de cada artículo
+                # get data
                 title = article.find_element(By.TAG_NAME, "h2").text
+                date = article.find_element(By.CSS_SELECTOR, ".updated").text
+                comments = article.find_element(By.CSS_SELECTOR, ".link-comments").text
                 link = article.find_element(By.TAG_NAME, "a").get_attribute("href")
-                data.append([title, link])
+                data.append([title, link, date, comments])
             except Exception as e:
-                print(f"Error al procesar un artículo: {e}")
+                print(f"Error to process page: {e}")
 
-        # Simular un scroll para cargar más contenido si es necesario
+        # scroll
         body = driver.find_element(By.TAG_NAME, "body")
         for _ in range(3):  # Scroll 3 veces
             body.send_keys(Keys.PAGE_DOWN)
             time.sleep(2)
 
-        # Guardar los datos en un archivo CSV
+        # save data
         with open(output_file, 'w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
-            writer.writerow(['Título', 'Enlace'])
+            writer.writerow(['Título', 'Enlace','date', 'comments'])
             writer.writerows(data)
         
         print(f"Datos guardados en {output_file}")
 
     finally:
-        # Cerrar el navegador
+        # close chromedriver
         driver.quit()
 
-# Parámetros de entrada
-url = "https://krebsonsecurity.com/"  # Reemplaza con el sitio web deseado
-driver_path = "D:\\Development\\drivers\\chromedriver-win64\\chromedriver.exe"  # Ruta al ejecutable de ChromeDriver
-output_file = "resultados.csv"  # Nombre del archivo de salida
+# values
+url = "https://krebsonsecurity.com/"
+driver_path = "D:\\Development\\drivers\\chromedriver-win64\\chromedriver.exe"
+output_file = "./data/resultados.csv"
 
-# Ejecutar la función
+# run function
 scrape_and_save(url, driver_path, output_file)
