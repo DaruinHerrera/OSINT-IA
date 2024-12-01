@@ -1,0 +1,17 @@
+requests
+beautifulsoup4
+scrapy
+selenium
+social-auth-core
+nltk
+spacy
+textblob
+pandas
+numpy
+matplotlib
+seaborn
+plotly
+folium
+scikit-learn
+tensorflow
+keras
